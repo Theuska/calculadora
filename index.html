@@ -201,7 +201,6 @@
         return;
       }
 
-      // --- NOVA REGRA DE NEGÓCIO ---
       // Verifica se o valor ou o prazo excedem os limites para cálculo automático
       if (valor > 200 || dias > 30) {
         elementoResultado.innerHTML = `<p>Para valores acima de R$ 200,00 ou prazos maiores que 30 dias, solicite um orçamento personalizado. 📲</p>`;
@@ -209,19 +208,22 @@
         return; // Interrompe a função aqui
       }
 
-      // O restante do código só é executado se a regra acima não for atendida
+      // --- LÓGICA DE TAXAS E JUROS ATUALIZADA ---
       let taxaFixa = 0;
       let jurosDia = 0;
 
       if (valor <= 50) {
         taxaFixa = 10;
-        jurosDia = 0.05;
+        jurosDia = 0.05; // 5%
       } else if (valor <= 100) {
         taxaFixa = 7.5;
-        jurosDia = 0.045;
-      } else { // Esta condição agora implicitamente significa: "se for maior que 100 E menor ou igual a 200"
+        jurosDia = 0.045; // 4.5%
+      } else if (valor <= 150) {
         taxaFixa = 6;
-        jurosDia = 0.039;
+        jurosDia = 0.039; // 3.9%
+      } else { // Esta condição agora cobre a faixa > R$ 150 e <= R$ 200
+        taxaFixa = 0;
+        jurosDia = 0.03; // 3%
       }
 
       const montante = valor * Math.pow(1 + jurosDia, dias) + taxaFixa;
