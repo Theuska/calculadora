@@ -3,105 +3,215 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Calculadora de Empréstimo</title>
+  <title>Calculadora de Empréstimo | Futuro</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
   <style>
+    /* Reset básico e configurações globais */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      max-width: 500px;
-      margin: auto;
+      font-family: 'Poppins', Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #111827; /* Fundo escuro sólido para navegadores que não suportam o gradiente */
+      background: linear-gradient(135deg, #111827 0%, #1F2937 100%);
+      color: #F9FAFB;
       padding: 20px;
-      background-color: #f4f4f4;
     }
-    h1 { color: #333; text-align: center; }
-    label, input {
-      display: block;
+
+    /* O container principal com efeito de vidro */
+    .calculator-container {
       width: 100%;
-      margin-bottom: 10px;
+      max-width: 480px;
+      background: rgba(31, 41, 55, 0.6); /* Cor de fundo semi-transparente */
+      backdrop-filter: blur(15px); /* O efeito de desfoque mágico! */
+      -webkit-backdrop-filter: blur(15px); /* Para compatibilidade com Safari */
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
     }
+    
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 600;
+      text-align: center;
+      margin-bottom: 30px;
+      text-shadow: 0 0 10px rgba(59, 130, 246, 0.3); /* Sombra de texto sutil */
+    }
+
+    label {
+      font-size: 0.9rem;
+      font-weight: 300;
+      margin-bottom: 8px;
+      color: #D1D5DB; /* Cor mais suave para os labels */
+    }
+
     input {
-      box-sizing: border-box; /* Garante que padding não afete a largura total */
-      padding: 8px;
-    }
-    button {
+      font-family: 'Poppins', sans-serif;
       width: 100%;
-      padding: 10px;
-      background: #007bff;
+      padding: 12px;
+      margin-bottom: 20px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #4B5563; /* Apenas uma linha na base */
+      color: #F9FAFB;
+      font-size: 1.2rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #3B82F6; /* Cor de destaque azul no foco */
+      box-shadow: 0 1px 0 0 #3B82F6;
+    }
+
+    /* Remove as setas de campos do tipo 'number' */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+
+    button {
+      font-family: 'Poppins', sans-serif;
+      width: 100%;
+      padding: 15px;
+      background: #3B82F6; /* Azul vibrante */
       color: white;
       border: none;
+      border-radius: 12px;
       cursor: pointer;
-      font-size: 1em;
-    }
-    button:hover {
-        background: #0056b3;
-    }
-    .resultado {
+      font-size: 1.2rem;
+      font-weight: 600;
       margin-top: 20px;
-      padding: 15px;
-      background-color: #e9ecef;
-      border-left: 5px solid #007bff;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
+
+    button:hover {
+      background: #2563EB; /* Um tom mais escuro no hover */
+      transform: translateY(-2px); /* Efeito de elevação sutil */
+    }
+
+    /* Estilo e animação da área de resultado */
+    .resultado {
+      margin-top: 30px;
+      padding: 0;
+      border-left: 3px solid #3B82F6;
+      background: rgba(17, 24, 39, 0.5);
+      border-radius: 0 8px 8px 0;
+      
+      /* Animação de surgimento */
+      opacity: 0;
+      max-height: 0;
+      overflow: hidden;
+      transition: opacity 0.5s ease, max-height 0.5s ease, padding 0.5s ease;
+    }
+    
+    .resultado.show {
+      opacity: 1;
+      max-height: 500px; /* Um valor alto para garantir que todo o conteúdo caiba */
+      padding: 20px;
+    }
+
     .resultado p {
-        margin: 5px 0; /* Espaçamento entre as linhas do resultado */
-        font-size: 1.1em;
+      margin-bottom: 10px;
+      font-size: 1.1rem;
     }
+    .resultado p:last-child {
+      margin-bottom: 0;
+    }
+    .resultado strong {
+      color: #9CA3AF;
+      font-weight: 400;
+    }
+    .resultado .valor-total {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #FFFFFF;
+    }
+
   </style>
 </head>
 <body>
-  <h1>🧾 Empréstimo Rápido</h1>
+  
+  <div class="calculator-container">
+    <h1>💸 Empréstimo Rápido</h1>
 
-  <label for="valor">💵 Valor emprestado (R$):</label>
-  <input type="number" id="valor" placeholder="Ex: 100" required>
+    <label for="valor">Quanto você precisa?</label>
+    <input type="number" id="valor" placeholder="100" required>
 
-  <label for="dias">📅 Dias:</label>
-  <input type="number" id="dias" placeholder="Ex: 5" required>
+    <label for="dias">Por quantos dias?</label>
+    <input type="number" id="dias" placeholder="5" required>
 
-  <button onclick="calcular()">Calcular Devolução</button>
+    <button onclick="calcular()">✨ Simular Agora</button>
 
-  <div class="resultado" id="resultado"></div>
+    <div class="resultado" id="resultado"></div>
+  </div>
 
   <script>
     function calcular() {
-      // 1. Obter os valores dos campos de entrada
+      // 1. Obter os valores e o elemento de resultado
       const valor = parseFloat(document.getElementById('valor').value);
       const dias = parseInt(document.getElementById('dias').value);
+      const elementoResultado = document.getElementById('resultado');
 
-      // Verifica se os valores são válidos antes de continuar
+      // Reseta a animação antes de um novo cálculo
+      elementoResultado.classList.remove('show');
+      
       if (isNaN(valor) || isNaN(dias) || valor <= 0 || dias <= 0) {
-        document.getElementById('resultado').innerHTML = `<p style="color: red;">Por favor, insira valores válidos.</p>`;
-        return; // Para a execução da função aqui
+        elementoResultado.innerHTML = `<p style="color: #F87171;">Por favor, preencha os campos corretamente.</p>`;
+        // Adiciona a classe 'show' para a mensagem de erro aparecer com animação
+        setTimeout(() => elementoResultado.classList.add('show'), 10);
+        return;
       }
 
-      // 2. Definir as taxas conforme o valor emprestado
+      // 2. Lógica de negócio (sem alterações)
       let taxaFixa = 0;
       let jurosDia = 0;
 
       if (valor <= 50) {
         taxaFixa = 10;
-        jurosDia = 0.05; // 5%
+        jurosDia = 0.05;
       } else if (valor <= 100) {
         taxaFixa = 7.5;
-        jurosDia = 0.045; // 4.5%
+        jurosDia = 0.045;
       } else {
         taxaFixa = 6;
-        jurosDia = 0.039; // 3.9%
+        jurosDia = 0.039;
       }
 
-      // 3. Calcular o montante final
+      // 3. Cálculo do montante (sem alterações)
       const montante = valor * Math.pow(1 + jurosDia, dias) + taxaFixa;
 
-      // 4. Formatar os valores para exibição amigável
+      // 4. Formatação para exibição
       const taxaFixaFormatada = `R$ ${taxaFixa.toFixed(2).replace('.', ',')}`;
-      const jurosDiaFormatado = `${(jurosDia * 100).toFixed(2).replace('.', ',')}%`;
+      const jurosDiaFormatado = `${(jurosDia * 100).toFixed(1).replace('.', ',')}%`;
       const valorTotalFormatado = `R$ ${montante.toFixed(2).replace('.', ',')}`;
       
-      // 5. Exibir o resultado detalhado no HTML
-      const elementoResultado = document.getElementById('resultado');
+      // 5. Monta o HTML do resultado e o exibe
       elementoResultado.innerHTML = `
-        <p><strong>Taxa fixa cobrada:</strong> ${taxaFixaFormatada}</p>
-        <p><strong>Juros ao dia:</strong> ${jurosDiaFormatado}</p>
-        <hr>
-        <p><strong>Valor total a devolver:</strong> ${valorTotalFormatado}</p>
+        <p><strong>Taxa Fixa:</strong> ${taxaFixaFormatada}</p>
+        <p><strong>Juros ao Dia:</strong> ${jurosDiaFormatado}</p>
+        <p><strong class="valor-total">Total a Pagar:</strong> <span class="valor-total">${valorTotalFormatado}</span></p>
       `;
+      
+      // Adiciona a classe 'show' para ativar a animação de surgimento
+      // O setTimeout garante que o navegador tenha tempo de processar a remoção da classe antes de adicioná-la de novo
+      setTimeout(() => elementoResultado.classList.add('show'), 10);
     }
   </script>
 </body>
