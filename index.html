@@ -1,316 +1,146 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Empréstimo | Versão Final</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulador de Renda com FIIs</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    /* Suporte a tema escuro */
+    body {
+      transition: background-color 0.3s, color 0.3s;
+    }
 
-    <style>
-        /* 1. ESTILIZAÇÃO (CSS) */
-        :root {
-            --primary: #3B82F6; --primary-dark: #2563EB; --danger: #EF4444;
-            --success: #22C55E;
-            --danger-light: #F87171; --text: #F9FAFB; --text-secondary: #D1D5DB;
-            --bg-dark: #111827; --bg-dark-secondary: #1F2937;
-            --bg-card: rgba(31, 41, 55, 0.6); --border: rgba(255, 255, 255, 0.1);
-            --success-border: #3B82F6; --error-bg: rgba(239, 68, 68, 0.1);
-            --error-border: #EF4444; --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            --success-bg: rgba(59, 130, 246, 0.1);
-        }
-        
-        .light-mode {
-            --text: #111827; --text-secondary: #4B5563; --bg-dark: #f3f4f6;
-            --bg-dark-secondary: #e5e7eb; --bg-card: rgba(255, 255, 255, 0.8);
-            --border: rgba(0, 0, 0, 0.1); --success-border: #1d4ed8;
-            --error-bg: rgba(239, 68, 68, 0.15); --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-            --success-bg: rgba(59, 130, 246, 0.1);
-        }
+    .dark-mode {
+      background-color: #1a202c;
+      color: #fff;
+    }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+    /* Valores da tabela no modo escuro */
+    .valor-total {
+      border-top: 1px solid #4a5568;
+      color: #fbbf24;
+    }
 
-        body {
-            font-family: 'Poppins', 'Segoe UI', sans-serif;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            min-height: 100vh; background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-dark-secondary) 100%);
-            color: var(--text); padding: 20px; transition: background 0.4s ease, color 0.4s ease;
-        }
+    /* Mensagem de sucesso no modo escuro */
+    .success-message {
+      background: #1e3a8a;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      color: white;
+      margin-top: 1rem;
+    }
 
-        .card-container {
-            width: 100%; max-width: 520px; background: var(--bg-card);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--border); border-radius: 24px;
-            padding: 40px; box-shadow: var(--shadow); margin-bottom: 25px;
-        }
-        
-        h1 {
-            font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 30px;
-            background: linear-gradient(90deg, #3B82F6, #8B5CF6);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        
-        h2 { text-align: center; margin-bottom: 25px; color: var(--text); }
-        .input-group { position: relative; margin-bottom: 25px; }
-        label { display: block; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary); }
+    /* Mensagem de alerta no modo escuro */
+    .warning-message {
+      background-color: #4b5563;
+      padding: 0.75rem;
+      border-radius: 0.375rem;
+      margin-top: 1rem;
+      color: #fff;
+    }
 
-        input {
-            font-family: inherit; width: 100%; padding: 14px; background: transparent;
-            border: none; border-bottom: 2px solid var(--border); color: var(--text);
-            font-size: 1.2rem; transition: all 0.3s ease;
-        }
-        input:focus { outline: none; border-color: var(--primary); }
-        input.invalid { border-color: var(--danger) !important; }
+    /* Ajustes para o tema claro */
+    .light-mode .success-message {
+      background: #e0f0ff;
+      color: #111827;
+    }
 
-        .button-group { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
-        .btn {
-            font-family: inherit; width: 100%; padding: 16px; color: white;
-            border: none; border-radius: 12px; cursor: pointer; font-size: 1.1rem;
-            font-weight: 600; transition: all 0.3s ease; display: flex;
-            align-items: center; justify-content: center; gap: 10px;
-        }
-        .btn-primary { background: linear-gradient(90deg, var(--primary), var(--primary-dark)); }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .light-mode .valor-total {
+      border-top: 1px solid #cbd5e1;
+      color: #0f172a;
+    }
 
-        .resultado { margin-top: 30px; max-height: 0; opacity: 0; overflow: hidden; transition: all 0.5s ease-in-out; }
-        .resultado.show { max-height: 600px; opacity: 1; }
+    .light-mode .warning-message {
+      background-color: #fff0f0;
+    }
 
-        .success-message { padding: 25px; border-left: 4px solid var(--success-border); background: var(--success-bg); border-radius: 12px; position: relative; padding-bottom: 60px; }
-        .success-message p { 
-            margin-bottom: 12px; font-size: 1.1rem; display: flex; justify-content: space-between;
-            opacity: 0; animation: fadeInStagger 0.5s ease forwards;
-        }
-        .success-message p:nth-child(1) { animation-delay: 0.1s; }
-        .success-message p:nth-child(2) { animation-delay: 0.2s; }
-        .success-message p:nth-child(3) { animation-delay: 0.3s; }
-        .success-message p:nth-child(4) { animation-delay: 0.4s; }
-        .valor-total { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); }
-        @keyframes fadeInStagger { to { opacity: 1; } }
-        
-        .btn-copy {
-            position: absolute; bottom: 15px; right: 15px;
-            width: auto; padding: 7px 13px;
-            background: var(--primary);
-            font-size: 0.8rem;
-            border-radius: 8px; cursor: pointer;
-            border: none; color: white; transition: background-color 0.3s ease, transform 0.2s ease;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .btn-copy:hover { background-color: var(--primary-dark); transform: scale(1.05); }
-        .btn-copy.copied {
-            background-color: var(--success);
-            cursor: default;
-        }
+    /* Remove setas do input de número */
+    input[type=number]::-webkit-outer-spin-button,
+    input[type=number]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
 
-        .error-message { display: flex; align-items: center; gap: 15px; padding: 20px; background: var(--error-bg); border-left: 4px solid var(--error-border); border-radius: 12px; animation: shake 0.5s ease; }
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
-        .error-message h4 { margin: 0 0 5px 0; color: var(--danger-light); }
-
-        .rule-block { margin-bottom: 20px; padding: 20px; border-radius: 16px; background: rgba(17, 24, 39, 0.3); transition: all 0.3s ease; }
-        .rule-block:hover { background: rgba(31, 41, 55, 0.8); transform: translateY(-3px); }
-        .rules-container h3 { font-size: 1.2rem; color: var(--text); margin-bottom: 15px; }
-        .rules-container p { font-size: 1rem; color: var(--text-secondary); line-height: 1.6; }
-        .rules-container .example { font-style: italic; color: var(--text-secondary); font-size: 0.95rem; margin-top: 10px; background: var(--success-bg); padding: 8px 12px; border-radius: 8px; display: inline-block;}
-        
-        /* ADIÇÃO: Estilo para a mensagem de aviso */
-        .warning-message {
-            background-color: var(--bg-dark-secondary);
-            border: 2px dashed var(--danger);
-            border-radius: 16px;
-            padding: 15px 20px;
-            margin-top: 15px;
-            color: var(--danger-light);
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .light-mode .rule-block:hover { background: #d1d5db; }
-        .light-mode .rule-block:hover h3,
-        .light-mode .rule-block:hover p { color: #111827; }
-        
-        .history-container { max-height: 400px; overflow-y: auto; padding-right: 10px; }
-        .history-item { background: var(--bg-dark-secondary); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--primary); font-size: 0.9rem; }
-        .history-item p { margin: 0; } .history-item span { font-weight: 700; color: var(--text); }
-        #no-history { color: var(--text-secondary); text-align: center; }
-
-        .theme-toggle { position: fixed; top: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); font-size: 1.3rem; z-index: 100; transition: all 0.3s ease; }
-        .theme-toggle:hover { transform: rotate(20deg) scale(1.1); }
-    </style>
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  </style>
 </head>
-<body>
-    <button class="theme-toggle" id="themeToggle" title="Alterar Tema"><i class="fas fa-moon"></i></button>
-    
-    <div class="card-container">
-        <h1></i> Empréstimo Rápido</h1>
-        <div class="input-group"><label for="valor">Quanto você precisa?</label><input type="text" id="valor" placeholder="R$ 0,00" required></div>
-        <div class="input-group"><label for="dias">Por quantos dias?</label><input type="number" id="dias" placeholder="5" min="1" max="30" required></div>
-        <div class="button-group">
-            <button class="btn btn-primary" onclick="calcular()">✨ Simular</button>
-        </div>
-        <div class="resultado" id="resultado"></div>
+<body class="bg-white text-gray-900 light-mode transition-colors duration-300">
+  <div class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold">Simulador de Renda com FIIs</h1>
+      <button id="toggleTheme" class="px-4 py-2 bg-blue-500 text-white rounded">Alternar Tema</button>
     </div>
 
-    <div class="card-container">
-        <h2><i class="fas fa-history"></i> Histórico de Simulações</h2>
-        <div class="history-container" id="historyContainer"><p id="no-history">Nenhuma simulação foi feita ainda.</p></div>
+    <form id="simulador" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div>
+        <label for="aporteInicial" class="block font-medium">Aporte Inicial (R$)</label>
+        <input type="number" id="aporteInicial" name="aporteInicial" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2" required>
+      </div>
+      <div>
+        <label for="aporteMensal" class="block font-medium">Aporte Mensal (R$)</label>
+        <input type="number" id="aporteMensal" name="aporteMensal" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2" required>
+      </div>
+      <div>
+        <label for="dias" class="block font-medium">Período (anos)</label>
+        <input type="number" id="dias" name="dias" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm px-3 py-2" required>
+      </div>
+      <div class="md:col-span-3">
+        <button type="submit" class="mt-2 px-4 py-2 bg-green-600 text-white rounded w-full">Calcular</button>
+      </div>
+    </form>
+
+    <div id="resultado" class="success-message hidden"></div>
+    <div class="warning-message mt-4">
+      Atenção: este simulador faz uma estimativa com base em um rendimento médio de FIIs de 0,8% ao mês e reinvestimento automático dos proventos. Os valores apresentados não são garantidos.
     </div>
-    
-    <div class="card-container rules-container">
-        <h2>🧾 Tabela de Empréstimo</h2>
-        <div class="rule-block">
-            <h3>💵 Valores até R$ 50,00</h3><p>🔹 Taxa fixa: R$ 10,00</p><p>🔹 Juros: 4% ao dia</p><p class="example">📌 Ex: Pegou R$ 40 por 5 dias → devolve R$ 58,67</p>
-        </div>
-        <div class="rule-block">
-            <h3>💵 De R$ 50,01 a R$ 100,00</h3><p>🔸 Taxa fixa: R$ 7,50</p><p>🔸 Juros: 3% ao dia</p><p class="example">📌 Ex: Pegou R$ 80 por 5 dias → devolve R$ 100,24</p>
-        </div>
-        <div class="rule-block">
-            <h3>💵 De R$ 100,01 a R$ 200,00</h3><p>🔺 Taxa fixa: R$ 0,00</p><p>🔺 Juros: 2% ao dia</p><p class="example">📌 Ex: Pegou R$ 150 por 5 dias → devolve R$ 165,61</p>
-        </div>
-        <div class="warning-message">
-            <i class="fas fa-exclamation-triangle"></i> Só chame se for pra pagar certo. Sem enrolação.
-        </div>
-    </div>
+  </div>
 
-    <template id="historyItemTemplate">
-        <div class="history-item">
-            <p>Valor: <span class="history-valor"></span> | Dias: <span class="history-dias"></span></p>
-            <p>Total a Pagar: <span class="history-total"></span></p>
-        </div>
-    </template>
+  <script>
+    const form = document.getElementById('simulador');
+    const resultado = document.getElementById('resultado');
+    const toggleTheme = document.getElementById('toggleTheme');
+    const body = document.body;
 
-<script>
-    // 3. FUNCIONALIDADE (JAVASCRIPT)
-    const valorInput = document.getElementById('valor');
-    const diasInput = document.getElementById('dias');
-    const elementoResultado = document.getElementById('resultado');
-    const historyContainer = document.getElementById('historyContainer');
-    const noHistoryMsg = document.getElementById('no-history');
-    const historyItemTemplate = document.getElementById('historyItemTemplate');
-    const themeToggle = document.getElementById('themeToggle');
-    const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+    let darkMode = false;
 
-    valorInput.addEventListener('input', (e) => {
-        let valorNumerico = e.target.value.replace(/\D/g, '');
-        valorInput.classList.toggle('invalid', valorNumerico > 20000);
-        if (valorNumerico === '') { e.target.value = ''; return; }
-        e.target.value = formatadorMoeda.format(parseFloat(valorNumerico) / 100);
-    });
-    diasInput.addEventListener('input', () => { diasInput.classList.toggle('invalid', parseInt(diasInput.value) > 30); });
-
-    themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('light-mode');
-        const isLight = document.body.classList.contains('light-mode');
-        themeToggle.innerHTML = isLight ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    toggleTheme.addEventListener('click', () => {
+      darkMode = !darkMode;
+      if (darkMode) {
+        body.classList.add('dark-mode');
+        body.classList.remove('light-mode');
+      } else {
+        body.classList.remove('dark-mode');
+        body.classList.add('light-mode');
+      }
     });
 
-    let historico = [];
-    const carregarHistorico = () => {
-        historico = JSON.parse(localStorage.getItem('loanHistory')) || [];
-        atualizarDisplayHistorico();
-    };
-    const salvarHistorico = () => { localStorage.setItem('loanHistory', JSON.stringify(historico)); };
-    const adicionarAoHistorico = (item) => {
-        historico.unshift(item);
-        historico = historico.slice(0, 3);
-        salvarHistorico();
-        atualizarDisplayHistorico();
-    };
-    const atualizarDisplayHistorico = () => {
-        historyContainer.innerHTML = '';
-        if (historico.length === 0) {
-            historyContainer.appendChild(noHistoryMsg);
-        } else {
-            historico.forEach(item => {
-                const clone = historyItemTemplate.content.cloneNode(true);
-                clone.querySelector('.history-valor').textContent = formatadorMoeda.format(item.valor);
-                clone.querySelector('.history-dias').textContent = item.dias;
-                clone.querySelector('.history-total').textContent = formatadorMoeda.format(item.total);
-                historyContainer.appendChild(clone);
-            });
-        }
-    };
-    
-    function calcular() {
-        elementoResultado.classList.remove('show');
-        elementoResultado.innerHTML = '';
-        
-        const valor = parseFloat(valorInput.value.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
-        const dias = parseInt(diasInput.value);
-        
-        if (isNaN(valor) || isNaN(dias) || valor <= 0 || dias <= 0 || valor > 200 || dias > 30) {
-            showError('Entrada Inválida', 'Verifique os valores e os limites (R$ 200,00 e 30 dias).');
-            return;
-        }
-        
-        // MODIFICAÇÃO: Lógica de juros atualizada
-        let taxaFixa = 0, jurosDia = 0;
-        if (valor <= 50) { taxaFixa = 10; jurosDia = 0.04; }      // Era 5%
-        else if (valor <= 100) { taxaFixa = 7.5; jurosDia = 0.03; } // Era 4.5%
-        else { taxaFixa = 0; jurosDia = 0.02; }                  // Era 3%
-        
-        const montante = valor * Math.pow(1 + jurosDia, dias) + taxaFixa;
-        const jurosTotal = montante - valor - taxaFixa;
-        
-        showResult(valor, dias, montante, jurosTotal, taxaFixa);
-        adicionarAoHistorico({ valor: valor, dias: dias, total: montante });
-    }
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
 
-    function showResult(valor, dias, montante, jurosTotal, taxaFixa) {
-        const dataDevolucao = new Date();
-        dataDevolucao.setDate(dataDevolucao.getDate() + dias);
-        const dataFormatada = dataDevolucao.toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        const mensagemCopia = `Eu quero pegar ${formatadorMoeda.format(valor)} emprestados por ${dias} dias, irei lhe devolver um total de ${formatadorMoeda.format(montante)} reais no dia ${dataFormatada}.`;
+      const aporteInicial = parseFloat(document.getElementById('aporteInicial').value);
+      const aporteMensal = parseFloat(document.getElementById('aporteMensal').value);
+      const anos = parseInt(document.getElementById('dias').value);
 
-        elementoResultado.innerHTML = `
-            <div class="success-message">
-                <p><strong>Valor solicitado:</strong> <span>${formatadorMoeda.format(valor)}</span></p>
-                <p><strong>Prazo:</strong> <span>${dias} dia${dias > 1 ? 's' : ''}</span></p>
-                <p><strong>Total de Juros:</strong> <span>${formatadorMoeda.format(jurosTotal)}</span></p>
-                <p class="valor-total"><strong>Total a pagar:</strong> <span>${formatadorMoeda.format(montante)}</span></p>
-                <button class="btn btn-copy" onclick="copiarResultado('${mensagemCopia}', this)"><i class="fas fa-copy"></i> Copiar</button>
-            </div>
-        `;
-        setTimeout(() => elementoResultado.classList.add('show'), 10);
-    }
-    
-    function showError(title, message) {
-        elementoResultado.innerHTML = `
-            <div class="error-message">
-                <span class="icon"><i class="fas fa-exclamation-circle"></i></span>
-                <div><h4>${title}</h4><p>${message}</p></div>
-            </div>
-        `;
-        setTimeout(() => elementoResultado.classList.add('show'), 10);
-    }
+      const taxaMensal = 0.008; // 0,8% ao mês
+      let total = aporteInicial;
+      let proventos = 0;
 
-    function copiarResultado(texto, botao) {
-        if (botao.disabled) return;
+      for (let i = 0; i < anos * 12; i++) {
+        proventos += total * taxaMensal;
+        total += aporteMensal + total * taxaMensal;
+      }
 
-        navigator.clipboard.writeText(texto).then(() => {
-            botao.innerHTML = '<i class="fas fa-check"></i> Copiado!';
-            botao.classList.add('copied');
-            botao.disabled = true;
-        }, () => {
-            botao.innerHTML = 'Falhou!';
-            botao.style.backgroundColor = 'var(--danger)';
-            botao.disabled = true;
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        if (localStorage.getItem('theme') === 'light') {
-            document.body.classList.add('light-mode');
-            themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
-        }
-        carregarHistorico();
+      resultado.innerHTML = `
+        <div class="valor-total">
+          <p class="text-lg font-semibold">Valor final: R$ ${total.toFixed(2).replace('.', ',')}</p>
+          <p class="text-sm mt-1">Total de proventos recebidos: R$ ${proventos.toFixed(2).replace('.', ',')}</p>
+        </div>
+      `;
+      resultado.classList.remove('hidden');
     });
-</script>
-
+  </script>
 </body>
 </html>
