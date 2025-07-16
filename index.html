@@ -152,7 +152,7 @@
     <h1>💸 Empréstimo Rápido</h1>
 
     <label for="valor">Quanto você precisa?</label>
-    <input type="number" id="valor" placeholder="100" required>
+    <input type="text" id="valor" placeholder="R$ 0,00" required>
 
     <label for="dias">Por quantos dias?</label>
     <input type="number" id="dias" placeholder="5" required>
@@ -163,23 +163,54 @@
   </div>
 
   <script>
+    // --- CÓDIGO DA MÁSCARA DE MOEDA ---
+    const valorInput = document.getElementById('valor');
+
+    // Cria um formatador de moeda para o Brasil
+    const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2
+    });
+
+    valorInput.addEventListener('input', (e) => {
+      // 1. Pega o valor digitado e remove tudo que não for número
+      let valorNumerico = e.target.value.replace(/\D/g, '');
+      
+      // Se não houver nada, mantém o campo vazio
+      if (valorNumerico === '') {
+        e.target.value = '';
+        return;
+      }
+
+      // 2. Converte o valor para um número (ex: "10050" -> 100.50)
+      let valorFloat = parseFloat(valorNumerico) / 100;
+
+      // 3. Usa o formatador para transformar o número em string de moeda
+      let valorFormatado = formatadorMoeda.format(valorFloat);
+
+      // 4. Atualiza o valor no campo
+      e.target.value = valorFormatado;
+    });
+
+
     function calcular() {
-      // 1. Obter os valores e o elemento de resultado
-      const valor = parseFloat(document.getElementById('valor').value);
+      // --- OBTENDO O VALOR NUMÉRICO A PARTIR DA MÁSCARA ---
+      const valorFormatado = document.getElementById('valor').value;
+      // Remove o "R$", os pontos de milhar e troca a vírgula por ponto para o cálculo
+      const valor = parseFloat(valorFormatado.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
+      
       const dias = parseInt(document.getElementById('dias').value);
       const elementoResultado = document.getElementById('resultado');
 
-      // Reseta a animação antes de um novo cálculo
       elementoResultado.classList.remove('show');
       
       if (isNaN(valor) || isNaN(dias) || valor <= 0 || dias <= 0) {
         elementoResultado.innerHTML = `<p style="color: #F87171;">Por favor, preencha os campos corretamente.</p>`;
-        // Adiciona a classe 'show' para a mensagem de erro aparecer com animação
         setTimeout(() => elementoResultado.classList.add('show'), 10);
         return;
       }
 
-      // 2. Lógica de negócio (sem alterações)
       let taxaFixa = 0;
       let jurosDia = 0;
 
@@ -194,23 +225,20 @@
         jurosDia = 0.039;
       }
 
-      // 3. Cálculo do montante (sem alterações)
       const montante = valor * Math.pow(1 + jurosDia, dias) + taxaFixa;
 
-      // 4. Formatação para exibição
-      const taxaFixaFormatada = `R$ ${taxaFixa.toFixed(2).replace('.', ',')}`;
+      // --- USANDO O FORMATADOR PARA OS RESULTADOS ---
+      const taxaFixaFormatada = formatadorMoeda.format(taxaFixa);
       const jurosDiaFormatado = `${(jurosDia * 100).toFixed(1).replace('.', ',')}%`;
-      const valorTotalFormatado = `R$ ${montante.toFixed(2).replace('.', ',')}`;
+      const valorTotalFormatado = formatadorMoeda.format(montante);
       
-      // 5. Monta o HTML do resultado e o exibe
       elementoResultado.innerHTML = `
         <p><strong>Taxa Fixa:</strong> ${taxaFixaFormatada}</p>
         <p><strong>Juros ao Dia:</strong> ${jurosDiaFormatado}</p>
         <p><strong class="valor-total">Total a Pagar:</strong> <span class="valor-total">${valorTotalFormatado}</span></p>
       `;
       
-      // Adiciona a classe 'show' para ativar a animação de surgimento
-      // O setTimeout garante que o navegador tenha tempo de processar a remoção da classe antes de adicioná-la de novo
+      // Adiciona a classe 'show' para ativar a animação
       setTimeout(() => elementoResultado.classList.add('show'), 10);
     }
   </script>
