@@ -10,7 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
-    /* Reset básico e configurações globais */
+    /* O CSS continua o mesmo da versão anterior */
     * {
       margin: 0;
       padding: 0;
@@ -130,6 +130,7 @@
     .resultado p {
       margin-bottom: 10px;
       font-size: 1.1rem;
+      line-height: 1.6;
     }
     .resultado p:last-child {
       margin-bottom: 0;
@@ -163,10 +164,8 @@
   </div>
 
   <script>
-    // --- CÓDIGO DA MÁSCARA DE MOEDA ---
     const valorInput = document.getElementById('valor');
 
-    // Cria um formatador de moeda para o Brasil
     const formatadorMoeda = new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
@@ -174,30 +173,20 @@
     });
 
     valorInput.addEventListener('input', (e) => {
-      // 1. Pega o valor digitado e remove tudo que não for número
       let valorNumerico = e.target.value.replace(/\D/g, '');
       
-      // Se não houver nada, mantém o campo vazio
       if (valorNumerico === '') {
         e.target.value = '';
         return;
       }
-
-      // 2. Converte o valor para um número (ex: "10050" -> 100.50)
       let valorFloat = parseFloat(valorNumerico) / 100;
-
-      // 3. Usa o formatador para transformar o número em string de moeda
       let valorFormatado = formatadorMoeda.format(valorFloat);
-
-      // 4. Atualiza o valor no campo
       e.target.value = valorFormatado;
     });
 
 
     function calcular() {
-      // --- OBTENDO O VALOR NUMÉRICO A PARTIR DA MÁSCARA ---
       const valorFormatado = document.getElementById('valor').value;
-      // Remove o "R$", os pontos de milhar e troca a vírgula por ponto para o cálculo
       const valor = parseFloat(valorFormatado.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
       
       const dias = parseInt(document.getElementById('dias').value);
@@ -205,12 +194,22 @@
 
       elementoResultado.classList.remove('show');
       
+      // Validação de campos vazios ou inválidos
       if (isNaN(valor) || isNaN(dias) || valor <= 0 || dias <= 0) {
         elementoResultado.innerHTML = `<p style="color: #F87171;">Por favor, preencha os campos corretamente.</p>`;
         setTimeout(() => elementoResultado.classList.add('show'), 10);
         return;
       }
 
+      // --- NOVA REGRA DE NEGÓCIO ---
+      // Verifica se o valor ou o prazo excedem os limites para cálculo automático
+      if (valor > 200 || dias > 30) {
+        elementoResultado.innerHTML = `<p>Para valores acima de R$ 200,00 ou prazos maiores que 30 dias, solicite um orçamento personalizado. 📲</p>`;
+        setTimeout(() => elementoResultado.classList.add('show'), 10);
+        return; // Interrompe a função aqui
+      }
+
+      // O restante do código só é executado se a regra acima não for atendida
       let taxaFixa = 0;
       let jurosDia = 0;
 
@@ -220,14 +219,13 @@
       } else if (valor <= 100) {
         taxaFixa = 7.5;
         jurosDia = 0.045;
-      } else {
+      } else { // Esta condição agora implicitamente significa: "se for maior que 100 E menor ou igual a 200"
         taxaFixa = 6;
         jurosDia = 0.039;
       }
 
       const montante = valor * Math.pow(1 + jurosDia, dias) + taxaFixa;
 
-      // --- USANDO O FORMATADOR PARA OS RESULTADOS ---
       const taxaFixaFormatada = formatadorMoeda.format(taxaFixa);
       const jurosDiaFormatado = `${(jurosDia * 100).toFixed(1).replace('.', ',')}%`;
       const valorTotalFormatado = formatadorMoeda.format(montante);
@@ -238,7 +236,6 @@
         <p><strong class="valor-total">Total a Pagar:</strong> <span class="valor-total">${valorTotalFormatado}</span></p>
       `;
       
-      // Adiciona a classe 'show' para ativar a animação
       setTimeout(() => elementoResultado.classList.add('show'), 10);
     }
   </script>
