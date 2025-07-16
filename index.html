@@ -65,6 +65,17 @@
         input:focus { outline: none; border-color: var(--primary); }
         input.invalid { border-color: var(--danger) !important; }
 
+        /* Remover setinhas do input number */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+
         .button-group { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
         .btn {
             font-family: inherit; width: 100%; padding: 16px; color: white;
@@ -109,13 +120,27 @@
         @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
         .error-message h4 { margin: 0 0 5px 0; color: var(--danger-light); }
 
-        .rule-block { margin-bottom: 20px; padding: 20px; border-radius: 16px; background: rgba(17, 24, 39, 0.3); transition: all 0.3s ease; }
-        .rule-block:hover { background: rgba(31, 41, 55, 0.8); transform: translateY(-3px); }
+        .rule-block { 
+            margin-bottom: 20px; 
+            padding: 20px; 
+            border-radius: 16px; 
+            background: rgba(17, 24, 39, 0.3); 
+            transition: all 0.3s ease; 
+        }
+
+        .light-mode .rule-block { 
+            background: transparent;
+        }
+
+        .light-mode .rule-block:hover { 
+            background: transparent;
+            transform: translateY(-3px); 
+        }
+
         .rules-container h3 { font-size: 1.2rem; color: var(--text); margin-bottom: 15px; }
         .rules-container p { font-size: 1rem; color: var(--text-secondary); line-height: 1.6; }
         .rules-container .example { font-style: italic; color: var(--text-secondary); font-size: 0.95rem; margin-top: 10px; background: var(--success-bg); padding: 8px 12px; border-radius: 8px; display: inline-block;}
         
-        /* ADIÇÃO: Estilo para a mensagem de aviso */
         .warning-message {
             background-color: var(--bg-dark-secondary);
             border: 2px dashed var(--danger);
@@ -129,9 +154,9 @@
             gap: 12px;
         }
 
-        .light-mode .rule-block:hover { background: #d1d5db; }
-        .light-mode .rule-block:hover h3,
-        .light-mode .rule-block:hover p { color: #111827; }
+        .light-mode .warning-message {
+            background-color: transparent;
+        }
         
         .history-container { max-height: 400px; overflow-y: auto; padding-right: 10px; }
         .history-item { background: var(--bg-dark-secondary); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--primary); font-size: 0.9rem; }
@@ -248,11 +273,10 @@
             return;
         }
         
-        // MODIFICAÇÃO: Lógica de juros atualizada
         let taxaFixa = 0, jurosDia = 0;
-        if (valor <= 50) { taxaFixa = 10; jurosDia = 0.04; }      // Era 5%
-        else if (valor <= 100) { taxaFixa = 7.5; jurosDia = 0.03; } // Era 4.5%
-        else { taxaFixa = 0; jurosDia = 0.02; }                  // Era 3%
+        if (valor <= 50) { taxaFixa = 10; jurosDia = 0.04; }
+        else if (valor <= 100) { taxaFixa = 7.5; jurosDia = 0.03; }
+        else { taxaFixa = 0; jurosDia = 0.02; }
         
         const montante = valor * Math.pow(1 + jurosDia, dias) + taxaFixa;
         const jurosTotal = montante - valor - taxaFixa;
@@ -265,9 +289,9 @@
         const dataDevolucao = new Date();
         dataDevolucao.setDate(dataDevolucao.getDate() + dias);
         const dataFormatada = dataDevolucao.toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-        const mensagemCopia = Eu quero pegar ${formatadorMoeda.format(valor)} emprestados por ${dias} dias, irei lhe devolver um total de ${formatadorMoeda.format(montante)} reais no dia ${dataFormatada}.;
+        const mensagemCopia = `Eu quero pegar ${formatadorMoeda.format(valor)} emprestados por ${dias} dias, irei lhe devolver um total de ${formatadorMoeda.format(montante)} reais no dia ${dataFormatada}.`;
 
-        elementoResultado.innerHTML = 
+        elementoResultado.innerHTML = `
             <div class="success-message">
                 <p><strong>Valor solicitado:</strong> <span>${formatadorMoeda.format(valor)}</span></p>
                 <p><strong>Prazo:</strong> <span>${dias} dia${dias > 1 ? 's' : ''}</span></p>
@@ -275,17 +299,17 @@
                 <p class="valor-total"><strong>Total a pagar:</strong> <span>${formatadorMoeda.format(montante)}</span></p>
                 <button class="btn btn-copy" onclick="copiarResultado('${mensagemCopia}', this)"><i class="fas fa-copy"></i> Copiar</button>
             </div>
-        ;
+        `;
         setTimeout(() => elementoResultado.classList.add('show'), 10);
     }
     
     function showError(title, message) {
-        elementoResultado.innerHTML = 
+        elementoResultado.innerHTML = `
             <div class="error-message">
                 <span class="icon"><i class="fas fa-exclamation-circle"></i></span>
                 <div><h4>${title}</h4><p>${message}</p></div>
             </div>
-        ;
+        `;
         setTimeout(() => elementoResultado.classList.add('show'), 10);
     }
 
