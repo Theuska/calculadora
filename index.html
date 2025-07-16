@@ -18,17 +18,31 @@
       width: 100%;
       margin-bottom: 10px;
     }
+    input {
+      box-sizing: border-box; /* Garante que padding não afete a largura total */
+      padding: 8px;
+    }
     button {
+      width: 100%;
       padding: 10px;
       background: #007bff;
       color: white;
       border: none;
       cursor: pointer;
+      font-size: 1em;
+    }
+    button:hover {
+        background: #0056b3;
     }
     .resultado {
       margin-top: 20px;
-      font-weight: bold;
-      font-size: 1.2em;
+      padding: 15px;
+      background-color: #e9ecef;
+      border-left: 5px solid #007bff;
+    }
+    .resultado p {
+        margin: 5px 0; /* Espaçamento entre as linhas do resultado */
+        font-size: 1.1em;
     }
   </style>
 </head>
@@ -36,7 +50,7 @@
   <h1>🧾 Empréstimo Rápido</h1>
 
   <label for="valor">💵 Valor emprestado (R$):</label>
-  <input type="number" id="valor" placeholder="Ex: 80" required>
+  <input type="number" id="valor" placeholder="Ex: 100" required>
 
   <label for="dias">📅 Dias:</label>
   <input type="number" id="dias" placeholder="Ex: 5" required>
@@ -47,26 +61,47 @@
 
   <script>
     function calcular() {
+      // 1. Obter os valores dos campos de entrada
       const valor = parseFloat(document.getElementById('valor').value);
       const dias = parseInt(document.getElementById('dias').value);
+
+      // Verifica se os valores são válidos antes de continuar
+      if (isNaN(valor) || isNaN(dias) || valor <= 0 || dias <= 0) {
+        document.getElementById('resultado').innerHTML = `<p style="color: red;">Por favor, insira valores válidos.</p>`;
+        return; // Para a execução da função aqui
+      }
+
+      // 2. Definir as taxas conforme o valor emprestado
       let taxaFixa = 0;
       let jurosDia = 0;
 
       if (valor <= 50) {
         taxaFixa = 10;
-        jurosDia = 0.05;
+        jurosDia = 0.05; // 5%
       } else if (valor <= 100) {
         taxaFixa = 7.5;
-        jurosDia = 0.045;
+        jurosDia = 0.045; // 4.5%
       } else {
         taxaFixa = 6;
-        jurosDia = 0.039;
+        jurosDia = 0.039; // 3.9%
       }
 
+      // 3. Calcular o montante final
       const montante = valor * Math.pow(1 + jurosDia, dias) + taxaFixa;
-      const resultado = montante.toFixed(2).replace('.', ',');
 
-      document.getElementById('resultado').innerText = `📌 Valor a devolver: R$ ${resultado}`;
+      // 4. Formatar os valores para exibição amigável
+      const taxaFixaFormatada = `R$ ${taxaFixa.toFixed(2).replace('.', ',')}`;
+      const jurosDiaFormatado = `${(jurosDia * 100).toFixed(2).replace('.', ',')}%`;
+      const valorTotalFormatado = `R$ ${montante.toFixed(2).replace('.', ',')}`;
+      
+      // 5. Exibir o resultado detalhado no HTML
+      const elementoResultado = document.getElementById('resultado');
+      elementoResultado.innerHTML = `
+        <p><strong>Taxa fixa cobrada:</strong> ${taxaFixaFormatada}</p>
+        <p><strong>Juros ao dia:</strong> ${jurosDiaFormatado}</p>
+        <hr>
+        <p><strong>Valor total a devolver:</strong> ${valorTotalFormatado}</p>
+      `;
     }
   </script>
 </body>
