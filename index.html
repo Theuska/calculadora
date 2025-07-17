@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Empréstimo | Versão Final</title>
+    <title>Calculadora de Empréstimo | Versão Atualizada</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -54,7 +54,7 @@
         }
         
         h2 { text-align: center; margin-bottom: 25px; color: var(--text); }
-        .input-group { position: relative; margin-bottom: 25px; }
+        .input-group { position: relative; margin-bottom: 15px; }
         label { display: block; font-weight: 500; margin-bottom: 8px; color: var(--text-secondary); }
 
         input {
@@ -73,6 +73,17 @@
         input[type=number] {
             -moz-appearance: textfield;
         }
+        
+        .warning-text {
+            color: var(--danger);
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 8px;
+            min-height: 15px; /* Evita que o layout pule */
+            transition: opacity 0.3s ease;
+        }
+        
+        /* REMOVIDO: Estilos para Tooltip foram removidos daqui */
 
         .button-group { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
         .btn {
@@ -92,12 +103,11 @@
             margin-bottom: 12px; font-size: 1.1rem; display: flex; justify-content: space-between;
             opacity: 0; animation: fadeInStagger 0.5s ease forwards;
         }
-        /* ALTERAÇÃO CSS: Adicionada animação para o 5º item do resultado */
         .success-message p:nth-child(1) { animation-delay: 0.1s; }
         .success-message p:nth-child(2) { animation-delay: 0.2s; }
         .success-message p:nth-child(3) { animation-delay: 0.3s; }
         .success-message p:nth-child(4) { animation-delay: 0.4s; }
-        .success-message p:nth-child(5) { animation-delay: 0.5s; } /* Novo */
+        .success-message p:nth-child(5) { animation-delay: 0.5s; }
 
         .valor-total { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); }
         @keyframes fadeInStagger { to { opacity: 1; } }
@@ -158,9 +168,20 @@
     <button class="theme-toggle" id="themeToggle" title="Alterar Tema"><i class="fas fa-moon"></i></button>
     
     <div class="card-container">
-        <h1></i> Empréstimo Rápido</h1>
-        <div class="input-group"><label for="valor">Quanto você precisa?</label><input type="text" id="valor" placeholder="R$ 0,00" required></div>
-        <div class="input-group"><label for="dias">Por quantos dias?</label><input type="number" id="dias" placeholder="5" min="1" max="30" required></div>
+        <h1><i class="fas fa-rocket"></i> Empréstimo Rápido</h1>
+        
+        <div class="input-group">
+            <label for="valor">Quanto você precisa?</label>
+            <input type="text" id="valor" placeholder="R$ 0,00" required>
+            <div class="warning-text" id="valor-warning"></div>
+        </div>
+        
+        <div class="input-group">
+            <label for="dias">Por quantos dias?</label>
+            <input type="number" id="dias" placeholder="5" min="1" max="15" required>
+            <div class="warning-text" id="dias-warning"></div>
+        </div>
+
         <div class="button-group">
             <button class="btn btn-primary" onclick="calcular()">✨ Simular</button>
         </div>
@@ -175,10 +196,10 @@
     <div class="card-container rules-container">
         <h2>🧾 Tabela de Empréstimo</h2>
         <div class="rule-block">
-            <h3>💵 Valores até R$ 50,00</h3><p>🔹 Taxa fixa: R$ 10,00</p><p>🔹 Juros: 4% ao dia</p><p class="example">📌 Ex: Pegou R$ 40 por 5 dias → devolve R$ 58,67</p>
+            <h3>💵 Valores até R$ 50,00</h3><p>🔹 Taxa fixa: R$ 10,00</p><p>🔹 Juros: 3,5% ao dia</p><p class="example">📌 Ex: Pegou R$ 40 por 5 dias → devolve R$ 57,51</p>
         </div>
         <div class="rule-block">
-            <h3>💵 De R$ 50,01 a R$ 100,00</h3><p>🔸 Taxa fixa: R$ 7,50</p><p>🔸 Juros: 3% ao dia</p><p class="example">📌 Ex: Pegou R$ 80 por 5 dias → devolve R$ 100,24</p>
+            <h3>💵 De R$ 50,01 a R$ 100,00</h3><p>🔸 Taxa fixa: R$ 7,50</p><p>🔸 Juros: 2,5% ao dia</p><p class="example">📌 Ex: Pegou R$ 80 por 5 dias → devolve R$ 98,01</p>
         </div>
         <div class="rule-block">
             <h3>💵 De R$ 100,01 a R$ 200,00</h3>
@@ -207,15 +228,37 @@
     const noHistoryMsg = document.getElementById('no-history');
     const historyItemTemplate = document.getElementById('historyItemTemplate');
     const themeToggle = document.getElementById('themeToggle');
+    const valorWarning = document.getElementById('valor-warning');
+    const diasWarning = document.getElementById('dias-warning');
+    
     const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
     valorInput.addEventListener('input', (e) => {
         let valorNumerico = e.target.value.replace(/\D/g, '');
-        valorInput.classList.toggle('invalid', valorNumerico > 20000);
+        const valorFloat = parseFloat(valorNumerico) / 100;
+        
+        if (valorFloat > 200) {
+            valorInput.classList.add('invalid');
+            valorWarning.textContent = 'O valor máximo permitido é R$ 200,00.';
+        } else {
+            valorInput.classList.remove('invalid');
+            valorWarning.textContent = '';
+        }
+
         if (valorNumerico === '') { e.target.value = ''; return; }
-        e.target.value = formatadorMoeda.format(parseFloat(valorNumerico) / 100);
+        e.target.value = formatadorMoeda.format(valorFloat);
     });
-    diasInput.addEventListener('input', () => { diasInput.classList.toggle('invalid', parseInt(diasInput.value) > 30); });
+    
+    diasInput.addEventListener('input', () => {
+        const dias = parseInt(diasInput.value);
+        if (dias > 15) {
+            diasInput.classList.add('invalid');
+            diasWarning.textContent = 'O prazo máximo é de 15 dias.';
+        } else {
+            diasInput.classList.remove('invalid');
+            diasWarning.textContent = '';
+        }
+    });
 
     themeToggle.addEventListener('click', () => {
         document.body.classList.toggle('light-mode');
@@ -258,21 +301,22 @@
         const valor = parseFloat(valorInput.value.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
         const dias = parseInt(diasInput.value);
         
-        if (isNaN(valor) || isNaN(dias) || valor <= 0 || dias <= 0 || valor > 200 || dias > 30) {
-            showError('Entrada Inválida', 'Verifique os valores e os limites (R$ 200,00 e 30 dias).');
+        if (isNaN(valor) || isNaN(dias) || valor <= 0 || dias <= 0 || valor > 200 || dias > 15) {
+            showError('Entrada Inválida', 'Verifique os valores e os limites (R$ 200,00 e 15 dias).');
             return;
         }
         
         let taxaFixa = 0, jurosDia = 0;
+        // ALTERADO: Taxa de juros de 4% para 3.5%
         if (valor <= 50) { 
             taxaFixa = 10; 
-            jurosDia = 0.04;
+            jurosDia = 0.035; // Antes era 0.04
+        // ALTERADO: Taxa de juros de 3% para 2.5%
         } else if (valor <= 100) { 
             taxaFixa = 7.5; 
-            jurosDia = 0.03;
+            jurosDia = 0.025; // Antes era 0.03
         } else { 
-            // ALTERAÇÃO JAVASCRIPT: Lógica de cálculo atualizada
-            taxaFixa = 5; // Antes era 0
+            taxaFixa = 5;
             jurosDia = 0.02;
         }
         
@@ -289,7 +333,6 @@
         const dataFormatada = dataDevolucao.toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
         const mensagemCopia = `Eu quero pegar ${formatadorMoeda.format(valor)} emprestados por ${dias} dias, irei lhe devolver um total de ${formatadorMoeda.format(montante)} reais no dia ${dataFormatada}.`;
 
-        // ALTERAÇÃO JAVASCRIPT: Exibição da taxa fixa no resultado
         elementoResultado.innerHTML = `
             <div class="success-message">
                 <p><strong>Valor solicitado:</strong> <span>${formatadorMoeda.format(valor)}</span></p>
