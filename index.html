@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Empréstimo | Versão Atualizada</title>
+    <title>Calculadora de Empréstimo</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -79,11 +79,9 @@
             font-size: 0.85rem;
             font-weight: 500;
             margin-top: 8px;
-            min-height: 15px; /* Evita que o layout pule */
+            min-height: 15px;
             transition: opacity 0.3s ease;
         }
-        
-        /* REMOVIDO: Estilos para Tooltip foram removidos daqui */
 
         .button-group { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
         .btn {
@@ -168,7 +166,7 @@
     <button class="theme-toggle" id="themeToggle" title="Alterar Tema"><i class="fas fa-moon"></i></button>
     
     <div class="card-container">
-        <h1><i class="fas fa-rocket"></i> Empréstimo Rápido</h1>
+        <h1></i> Empréstimo Rápido</h1>
         
         <div class="input-group">
             <label for="valor">Quanto você precisa?</label>
@@ -196,13 +194,13 @@
     <div class="card-container rules-container">
         <h2>🧾 Tabela de Empréstimo</h2>
         <div class="rule-block">
-            <h3>💵 Valores até R$ 50,00</h3><p>🔹 Taxa fixa: R$ 10,00</p><p>🔹 Juros: 3,5% ao dia</p><p class="example">📌 Ex: Pegou R$ 40 por 5 dias → devolve R$ 57,51</p>
+            <h3>💵 Valores até R$ 49,00</h3><p>🔹 Taxa fixa: R$ 10,00</p><p>🔹 Juros: 3,5% ao dia</p><p class="example">📌 Ex: Pegou R$ 40 por 5 dias → devolve R$ 57,51</p>
         </div>
         <div class="rule-block">
-            <h3>💵 De R$ 50,01 a R$ 100,00</h3><p>🔸 Taxa fixa: R$ 7,50</p><p>🔸 Juros: 2,5% ao dia</p><p class="example">📌 Ex: Pegou R$ 80 por 5 dias → devolve R$ 98,01</p>
+            <h3>💵 De R$ 50,00 a R$ 99,00</h3><p>🔸 Taxa fixa: R$ 7,50</p><p>🔸 Juros: 2,5% ao dia</p><p class="example">📌 Ex: Pegou R$ 80 por 5 dias → devolve R$ 98,01</p>
         </div>
         <div class="rule-block">
-            <h3>💵 De R$ 100,01 a R$ 200,00</h3>
+            <h3>💵 De R$ 100,00 a R$ 200,00</h3>
             <p>🔺 Taxa fixa: R$ 5,00</p>
             <p>🔺 Juros: 2% ao dia</p>
             <p class="example">📌 Ex: Pegou R$ 150 por 5 dias → devolve R$ 170,61</p>
@@ -307,14 +305,13 @@
         }
         
         let taxaFixa = 0, jurosDia = 0;
-        // ALTERADO: Taxa de juros de 4% para 3.5%
-        if (valor <= 50) { 
+        // ALTERADO: Lógica de cálculo com as novas faixas
+        if (valor <= 49) { 
             taxaFixa = 10; 
-            jurosDia = 0.035; // Antes era 0.04
-        // ALTERADO: Taxa de juros de 3% para 2.5%
-        } else if (valor <= 100) { 
+            jurosDia = 0.035;
+        } else if (valor <= 99) { 
             taxaFixa = 7.5; 
-            jurosDia = 0.025; // Antes era 0.03
+            jurosDia = 0.025;
         } else { 
             taxaFixa = 5;
             jurosDia = 0.02;
