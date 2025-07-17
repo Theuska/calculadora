@@ -202,16 +202,22 @@
     <div class="card-container rules-container">
         <h2>🧾 Tabela de Empréstimo</h2>
         <div class="rule-block">
-            <h3>💵 Valores até R$ 49,00</h3><p>🔹 Taxa fixa: R$ 10,00</p><p>🔹 Juros: 3,5% ao dia</p><p class="example">📌 Ex: Pegou R$ 40 por 5 dias → devolve R$ 57,51</p>
+            <h3>💵 Valores até R$ 49,00</h3>
+            <p>🔹 Taxa fixa: R$ 5,00</p>
+            <p>🔹 Juros: 2,6% ao dia</p>
+            <p class="example">📌 Ex: Pegou R$ 40 por 5 dias → devolve R$ 50,47</p>
         </div>
         <div class="rule-block">
-            <h3>💵 De R$ 50,00 a R$ 99,00</h3><p>🔸 Taxa fixa: R$ 7,50</p><p>🔸 Juros: 2,5% ao dia</p><p class="example">📌 Ex: Pegou R$ 80 por 5 dias → devolve R$ 98,01</p>
+            <h3>💵 De R$ 50,00 a R$ 99,00</h3>
+            <p>🔸 Taxa fixa: R$ 6,90</p>
+            <p>🔸 Juros: 2% ao dia</p>
+            <p class="example">📌 Ex: Pegou R$ 80 por 5 dias → devolve R$ 95,23</p>
         </div>
         <div class="rule-block">
             <h3>💵 De R$ 100,00 a R$ 200,00</h3>
-            <p>🔺 Taxa fixa: R$ 5,00</p>
-            <p>🔺 Juros: 2% ao dia</p>
-            <p class="example">📌 Ex: Pegou R$ 150 por 5 dias → devolve R$ 170,61</p>
+            <p>🔺 Taxa fixa: R$ 7,90</p>
+            <p>🔺 Juros: 1,6% ao dia</p>
+            <p class="example">📌 Ex: Pegou R$ 150 por 5 dias → devolve R$ 170,29</p>
         </div>
         <div class="warning-message">
             <i class="fas fa-exclamation-triangle"></i> Só chame se for pra pagar certo. Sem enrolação.
@@ -281,7 +287,8 @@
     valorInput.addEventListener('input', (e) => {
         let valorNumerico = e.target.value.replace(/\D/g, '');
         const valorFloat = parseFloat(valorNumerico) / 100;
-        const limiteMaximo = (modoSimulacao === 'normal') ? 200 : 274.17;
+        // Limite máximo atualizado para R$200 pegos por 15 dias com a nova regra
+        const limiteMaximo = (modoSimulacao === 'normal') ? 200 : 261.70; 
         if (valorFloat > limiteMaximo) {
             valorInput.classList.add('invalid');
             valorWarning.textContent = `O valor máximo para este campo é ${formatadorMoeda.format(limiteMaximo)}.`;
@@ -352,15 +359,16 @@
         }
         
         let taxaFixa = 0, jurosDia = 0;
+        // REGRAS DE CÁLCULO ATUALIZADAS AQUI
         if (valor <= 49) {  
-            taxaFixa = 10;  
-            jurosDia = 0.035;
+            taxaFixa = 5;  
+            jurosDia = 0.026; // 2.6%
         } else if (valor <= 99) {  
-            taxaFixa = 7.5;  
-            jurosDia = 0.025;
+            taxaFixa = 6.90;  
+            jurosDia = 0.02; // 2%
         } else {  
-            taxaFixa = 5;
-            jurosDia = 0.02;
+            taxaFixa = 7.90;
+            jurosDia = 0.016; // 1.6%
         }
         
         const montante = valor * Math.pow(1 + jurosDia, dias) + taxaFixa;
@@ -384,20 +392,24 @@
 
         let valorPrincipal = 0;
 
-        let principalTemp = (montanteDesejado - 5) / Math.pow(1 + 0.02, dias);
+        // REGRAS DE CÁLCULO INVERSO ATUALIZADAS AQUI
+        // Teste para a faixa 3 (R$ 100 a R$ 200)
+        let principalTemp = (montanteDesejado - 7.90) / Math.pow(1 + 0.016, dias);
         if (principalTemp >= 100 && principalTemp <= 200) {
             valorPrincipal = principalTemp;
         }
 
+        // Teste para a faixa 2 (R$ 50 a R$ 99)
         if (valorPrincipal === 0) {
-            principalTemp = (montanteDesejado - 7.5) / Math.pow(1 + 0.025, dias);
+            principalTemp = (montanteDesejado - 6.90) / Math.pow(1 + 0.02, dias);
             if (principalTemp >= 50 && principalTemp < 100) {
                 valorPrincipal = principalTemp;
             }
         }
 
+        // Teste para a faixa 1 (Até R$ 49)
         if (valorPrincipal === 0) {
-            principalTemp = (montanteDesejado - 10) / Math.pow(1 + 0.035, dias);
+            principalTemp = (montanteDesejado - 5) / Math.pow(1 + 0.026, dias);
             if (principalTemp > 0 && principalTemp < 50) {
                 valorPrincipal = principalTemp;
             }
