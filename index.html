@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* 1. ESTILIZAÇÃO (CSS) */
+        /* CSS permanece o mesmo */
         :root {
             --primary: #3B82F6; --primary-dark: #2563EB; --danger: #EF4444;
             --success: #22C55E;
@@ -160,6 +160,10 @@
 
         .theme-toggle { position: fixed; top: 20px; right: 20px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text); font-size: 1.3rem; z-index: 100; transition: all 0.3s ease; }
         .theme-toggle:hover { transform: rotate(20deg) scale(1.1); }
+        
+        .simulation-toggle { display: flex; justify-content: center; margin-bottom: 25px; background: var(--bg-dark-secondary); border-radius: 12px; padding: 5px; }
+        .toggle-btn { flex: 1; padding: 10px 15px; border: none; background: transparent; color: var(--text-secondary); font-size: 1rem; font-weight: 600; cursor: pointer; border-radius: 8px; transition: all 0.3s ease; }
+        .toggle-btn.active { color: white; background: var(--primary); }
     </style>
 </head>
 <body>
@@ -168,20 +172,25 @@
     <div class="card-container">
         <h1></i> Empréstimo Rápido</h1>
         
+        <div class="simulation-toggle">
+            <button class="toggle-btn active" id="btnModoNormal">Preciso de</button>
+            <button class="toggle-btn" id="btnModoInverso">Posso pagar</button>
+        </div>
+        
         <div class="input-group">
-            <label for="valor">Quanto você precisa?</label>
+            <label for="valor" id="valorLabel">Quanto você precisa?</label>
             <input type="text" id="valor" placeholder="R$ 0,00" required>
             <div class="warning-text" id="valor-warning"></div>
         </div>
         
         <div class="input-group">
-            <label for="dias">Por quantos dias?</label>
+            <label for="dias" id="diasLabel">Por quantos dias?</label>
             <input type="number" id="dias" placeholder="5" min="1" max="15" required>
             <div class="warning-text" id="dias-warning"></div>
         </div>
 
         <div class="button-group">
-            <button class="btn btn-primary" onclick="calcular()">✨ Simular</button>
+            <button class="btn btn-primary" onclick="iniciarCalculo()">✨ Simular</button>
         </div>
         <div class="resultado" id="resultado"></div>
     </div>
@@ -229,15 +238,60 @@
     const valorWarning = document.getElementById('valor-warning');
     const diasWarning = document.getElementById('dias-warning');
     
+    const btnModoNormal = document.getElementById('btnModoNormal');
+    const btnModoInverso = document.getElementById('btnModoInverso');
+    const valorLabel = document.getElementById('valorLabel');
+    // ALTERADO: Selecionando a label dos dias
+    const diasLabel = document.getElementById('diasLabel'); 
+    let modoSimulacao = 'normal';
+
     const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+    // ALTERADO: Funções para alternar modo agora também mudam a label dos dias
+    function setModoNormal() {
+        modoSimulacao = 'normal';
+        btnModoNormal.classList.add('active');
+        btnModoInverso.classList.remove('active');
+        valorLabel.textContent = 'Quanto você precisa?';
+        diasLabel.textContent = 'Por quantos dias?'; // MUDANÇA AQUI
+        valorInput.placeholder = 'R$ 0,00';
+        limparCampos();
+    }
+
+    function setModoInverso() {
+        modoSimulacao = 'inverso';
+        btnModoInverso.classList.add('active');
+        btnModoNormal.classList.remove('active');
+        valorLabel.textContent = 'Quanto você quer devolver?';
+        diasLabel.textContent = 'Em quantos dias?'; // MUDANÇA AQUI
+        valorInput.placeholder = 'R$ 0,00';
+        limparCampos();
+    }
+
+    // A partir daqui, o resto do JavaScript continua igual ao que você enviou.
+    // ... (todo o resto do seu script)
+    function limparCampos() {
+        valorInput.value = '';
+        diasInput.value = '';
+        valorInput.classList.remove('invalid');
+        diasInput.classList.remove('invalid');
+        valorWarning.textContent = '';
+        diasWarning.textContent = '';
+        elementoResultado.classList.remove('show');
+    }
+
+    btnModoNormal.addEventListener('click', setModoNormal);
+    btnModoInverso.addEventListener('click', setModoInverso);
 
     valorInput.addEventListener('input', (e) => {
         let valorNumerico = e.target.value.replace(/\D/g, '');
         const valorFloat = parseFloat(valorNumerico) / 100;
         
-        if (valorFloat > 200) {
+        const limiteMaximo = (modoSimulacao === 'normal') ? 200 : 274.17;
+
+        if (valorFloat > limiteMaximo) {
             valorInput.classList.add('invalid');
-            valorWarning.textContent = 'O valor máximo permitido é R$ 200,00.';
+            valorWarning.textContent = `O valor máximo para este campo é ${formatadorMoeda.format(limiteMaximo)}.`;
         } else {
             valorInput.classList.remove('invalid');
             valorWarning.textContent = '';
@@ -292,7 +346,15 @@
         }
     };
     
-    function calcular() {
+    function iniciarCalculo() {
+        if (modoSimulacao === 'normal') {
+            calcularNormal();
+        } else {
+            calcularInverso();
+        }
+    }
+
+    function calcularNormal() {
         elementoResultado.classList.remove('show');
         elementoResultado.innerHTML = '';
         
@@ -305,14 +367,13 @@
         }
         
         let taxaFixa = 0, jurosDia = 0;
-        // ALTERADO: Lógica de cálculo com as novas faixas
-        if (valor <= 49) { 
-            taxaFixa = 10; 
+        if (valor <= 49) {  
+            taxaFixa = 10;  
             jurosDia = 0.035;
-        } else if (valor <= 99) { 
-            taxaFixa = 7.5; 
+        } else if (valor <= 99) {  
+            taxaFixa = 7.5;  
             jurosDia = 0.025;
-        } else { 
+        } else {  
             taxaFixa = 5;
             jurosDia = 0.02;
         }
@@ -320,11 +381,53 @@
         const montante = valor * Math.pow(1 + jurosDia, dias) + taxaFixa;
         const jurosTotal = montante - valor - taxaFixa;
         
-        showResult(valor, dias, montante, jurosTotal, taxaFixa);
+        showResultNormal(valor, dias, montante, jurosTotal, taxaFixa);
         adicionarAoHistorico({ valor: valor, dias: dias, total: montante });
     }
 
-    function showResult(valor, dias, montante, jurosTotal, taxaFixa) {
+    function calcularInverso() {
+        elementoResultado.classList.remove('show');
+        elementoResultado.innerHTML = '';
+
+        const montanteDesejado = parseFloat(valorInput.value.replace('R$', '').replace(/\./g, '').replace(',', '.').trim());
+        const dias = parseInt(diasInput.value);
+
+        if (isNaN(montanteDesejado) || isNaN(dias) || montanteDesejado <= 0 || dias <= 0 || dias > 15) {
+            showError('Entrada Inválida', 'Verifique o valor a devolver e o prazo (máx 15 dias).');
+            return;
+        }
+
+        let valorPrincipal = 0;
+
+        let principalTemp = (montanteDesejado - 5) / Math.pow(1 + 0.02, dias);
+        if (principalTemp >= 100 && principalTemp <= 200) {
+            valorPrincipal = principalTemp;
+        }
+
+        if (valorPrincipal === 0) {
+            principalTemp = (montanteDesejado - 7.5) / Math.pow(1 + 0.025, dias);
+            if (principalTemp >= 50 && principalTemp < 100) {
+                valorPrincipal = principalTemp;
+            }
+        }
+
+        if (valorPrincipal === 0) {
+            principalTemp = (montanteDesejado - 10) / Math.pow(1 + 0.035, dias);
+            if (principalTemp > 0 && principalTemp < 50) {
+                valorPrincipal = principalTemp;
+            }
+        }
+
+        if (valorPrincipal <= 0 || valorPrincipal > 200) {
+             showError('Cálculo Impossível', 'Não é possível chegar neste valor de devolução com as regras atuais. Tente um valor ou prazo diferente.');
+             return;
+        }
+
+        showResultInverso(valorPrincipal, dias, montanteDesejado);
+        adicionarAoHistorico({ valor: valorPrincipal, dias: dias, total: montanteDesejado });
+    }
+
+    function showResultNormal(valor, dias, montante, jurosTotal, taxaFixa) {
         const dataDevolucao = new Date();
         dataDevolucao.setDate(dataDevolucao.getDate() + dias);
         const dataFormatada = dataDevolucao.toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -342,6 +445,28 @@
         `;
         setTimeout(() => elementoResultado.classList.add('show'), 10);
     }
+
+    function showResultInverso(valorPrincipal, dias, montante) {
+        const dataDevolucao = new Date();
+        dataDevolucao.setDate(dataDevolucao.getDate() + dias);
+        const dataFormatada = dataDevolucao.toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        
+        const valorPrincipalFormatado = Math.floor(valorPrincipal * 100) / 100;
+        
+        const mensagemCopia = `Devolvendo ${formatadorMoeda.format(montante)} em ${dias} dias, posso pegar agora ${formatadorMoeda.format(valorPrincipalFormatado)}.`;
+
+        elementoResultado.innerHTML = `
+            <div class="success-message">
+                <p><strong>Valor a devolver:</strong> <span>${formatadorMoeda.format(montante)}</span></p>
+                <p><strong>Prazo:</strong> <span>${dias} dia${dias > 1 ? 's' : ''}</span></p>
+                <p class="valor-total"><strong>Você pode pegar agora:</strong> <span>${formatadorMoeda.format(valorPrincipalFormatado)}</span></p>
+                 <p><small>(Valor exato: ${formatadorMoeda.format(valorPrincipal)})</small></p>
+                <button class="btn btn-copy" onclick="copiarResultado('${mensagemCopia}', this)"><i class="fas fa-copy"></i> Copiar</button>
+            </div>
+        `;
+        setTimeout(() => elementoResultado.classList.add('show'), 10);
+    }
+
     
     function showError(title, message) {
         elementoResultado.innerHTML = `
@@ -373,6 +498,8 @@
             themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
         }
         carregarHistorico();
+        // Garante que a label dos dias esteja correta ao carregar a página
+        setModoNormal();
     });
 </script>
 
