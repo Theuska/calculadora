@@ -64,15 +64,14 @@
         }
         input:focus { outline: none; border-color: var(--primary); }
         input.invalid { border-color: var(--danger) !important; }
-        
-        /* ALTERAÇÃO 1: Remover setas do input de número */
+
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { 
             -webkit-appearance: none; 
             margin: 0; 
         }
         input[type=number] {
-            -moz-appearance: textfield; /* Para Firefox */
+            -moz-appearance: textfield;
         }
 
         .button-group { display: flex; justify-content: center; gap: 15px; margin-top: 20px; }
@@ -93,10 +92,13 @@
             margin-bottom: 12px; font-size: 1.1rem; display: flex; justify-content: space-between;
             opacity: 0; animation: fadeInStagger 0.5s ease forwards;
         }
+        /* ALTERAÇÃO CSS: Adicionada animação para o 5º item do resultado */
         .success-message p:nth-child(1) { animation-delay: 0.1s; }
         .success-message p:nth-child(2) { animation-delay: 0.2s; }
         .success-message p:nth-child(3) { animation-delay: 0.3s; }
         .success-message p:nth-child(4) { animation-delay: 0.4s; }
+        .success-message p:nth-child(5) { animation-delay: 0.5s; } /* Novo */
+
         .valor-total { font-size: 1.6rem; font-weight: 700; color: var(--text); margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); }
         @keyframes fadeInStagger { to { opacity: 1; } }
         
@@ -138,21 +140,10 @@
             gap: 12px;
         }
         
-        /* ALTERAÇÃO 2: Ajuste dos fundos no tema claro */
-        .light-mode .rule-block {
-            background-color: #ffffff; /* Fundo branco para os blocos da tabela */
-        }
-        .light-mode .rule-block:hover { 
-            background: #e5e7eb;  /* Mantém um hover sutil */
-        }
-        .light-mode .rule-block:hover h3,
-        .light-mode .rule-block:hover p { 
-            color: #111827; 
-        }
-        .light-mode .warning-message {
-            background-color: transparent; /* Remove o fundo cinza da mensagem de atenção */
-            color: var(--danger); /* Deixa o texto com um vermelho mais forte para melhor leitura */
-        }
+        .light-mode .rule-block { background-color: #ffffff; }
+        .light-mode .rule-block:hover { background: #e5e7eb; }
+        .light-mode .rule-block:hover h3, .light-mode .rule-block:hover p { color: #111827; }
+        .light-mode .warning-message { background-color: transparent; color: var(--danger); }
         
         .history-container { max-height: 400px; overflow-y: auto; padding-right: 10px; }
         .history-item { background: var(--bg-dark-secondary); padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 3px solid var(--primary); font-size: 0.9rem; }
@@ -190,7 +181,10 @@
             <h3>💵 De R$ 50,01 a R$ 100,00</h3><p>🔸 Taxa fixa: R$ 7,50</p><p>🔸 Juros: 3% ao dia</p><p class="example">📌 Ex: Pegou R$ 80 por 5 dias → devolve R$ 100,24</p>
         </div>
         <div class="rule-block">
-            <h3>💵 De R$ 100,01 a R$ 200,00</h3><p>🔺 Taxa fixa: R$ 0,00</p><p>🔺 Juros: 2% ao dia</p><p class="example">📌 Ex: Pegou R$ 150 por 5 dias → devolve R$ 165,61</p>
+            <h3>💵 De R$ 100,01 a R$ 200,00</h3>
+            <p>🔺 Taxa fixa: R$ 5,00</p>
+            <p>🔺 Juros: 2% ao dia</p>
+            <p class="example">📌 Ex: Pegou R$ 150 por 5 dias → devolve R$ 170,61</p>
         </div>
         <div class="warning-message">
             <i class="fas fa-exclamation-triangle"></i> Só chame se for pra pagar certo. Sem enrolação.
@@ -205,7 +199,7 @@
     </template>
 
 <script>
-    // O seu <script> continua igual
+    // 3. FUNCIONALIDADE (JAVASCRIPT)
     const valorInput = document.getElementById('valor');
     const diasInput = document.getElementById('dias');
     const elementoResultado = document.getElementById('resultado');
@@ -270,9 +264,17 @@
         }
         
         let taxaFixa = 0, jurosDia = 0;
-        if (valor <= 50) { taxaFixa = 10; jurosDia = 0.04; }
-        else if (valor <= 100) { taxaFixa = 7.5; jurosDia = 0.03; }
-        else { taxaFixa = 0; jurosDia = 0.02; }
+        if (valor <= 50) { 
+            taxaFixa = 10; 
+            jurosDia = 0.04;
+        } else if (valor <= 100) { 
+            taxaFixa = 7.5; 
+            jurosDia = 0.03;
+        } else { 
+            // ALTERAÇÃO JAVASCRIPT: Lógica de cálculo atualizada
+            taxaFixa = 5; // Antes era 0
+            jurosDia = 0.02;
+        }
         
         const montante = valor * Math.pow(1 + jurosDia, dias) + taxaFixa;
         const jurosTotal = montante - valor - taxaFixa;
@@ -287,10 +289,12 @@
         const dataFormatada = dataDevolucao.toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
         const mensagemCopia = `Eu quero pegar ${formatadorMoeda.format(valor)} emprestados por ${dias} dias, irei lhe devolver um total de ${formatadorMoeda.format(montante)} reais no dia ${dataFormatada}.`;
 
+        // ALTERAÇÃO JAVASCRIPT: Exibição da taxa fixa no resultado
         elementoResultado.innerHTML = `
             <div class="success-message">
                 <p><strong>Valor solicitado:</strong> <span>${formatadorMoeda.format(valor)}</span></p>
                 <p><strong>Prazo:</strong> <span>${dias} dia${dias > 1 ? 's' : ''}</span></p>
+                <p><strong>Taxa fixa:</strong> <span>${formatadorMoeda.format(taxaFixa)}</span></p>
                 <p><strong>Total de Juros:</strong> <span>${formatadorMoeda.format(jurosTotal)}</span></p>
                 <p class="valor-total"><strong>Total a pagar:</strong> <span>${formatadorMoeda.format(montante)}</span></p>
                 <button class="btn btn-copy" onclick="copiarResultado('${mensagemCopia}', this)"><i class="fas fa-copy"></i> Copiar</button>
