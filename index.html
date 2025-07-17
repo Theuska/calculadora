@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        /* CSS permanece o mesmo */
         :root {
             --primary: #3B82F6; --primary-dark: #2563EB; --danger: #EF4444;
             --success: #22C55E;
@@ -241,19 +240,17 @@
     const btnModoNormal = document.getElementById('btnModoNormal');
     const btnModoInverso = document.getElementById('btnModoInverso');
     const valorLabel = document.getElementById('valorLabel');
-    // ALTERADO: Selecionando a label dos dias
     const diasLabel = document.getElementById('diasLabel'); 
     let modoSimulacao = 'normal';
 
     const formatadorMoeda = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
 
-    // ALTERADO: Funções para alternar modo agora também mudam a label dos dias
     function setModoNormal() {
         modoSimulacao = 'normal';
         btnModoNormal.classList.add('active');
         btnModoInverso.classList.remove('active');
         valorLabel.textContent = 'Quanto você precisa?';
-        diasLabel.textContent = 'Por quantos dias?'; // MUDANÇA AQUI
+        diasLabel.textContent = 'Por quantos dias?';
         valorInput.placeholder = 'R$ 0,00';
         limparCampos();
     }
@@ -263,13 +260,11 @@
         btnModoInverso.classList.add('active');
         btnModoNormal.classList.remove('active');
         valorLabel.textContent = 'Quanto você quer devolver?';
-        diasLabel.textContent = 'Em quantos dias?'; // MUDANÇA AQUI
+        diasLabel.textContent = 'Em quantos dias?';
         valorInput.placeholder = 'R$ 0,00';
         limparCampos();
     }
 
-    // A partir daqui, o resto do JavaScript continua igual ao que você enviou.
-    // ... (todo o resto do seu script)
     function limparCampos() {
         valorInput.value = '';
         diasInput.value = '';
@@ -286,9 +281,7 @@
     valorInput.addEventListener('input', (e) => {
         let valorNumerico = e.target.value.replace(/\D/g, '');
         const valorFloat = parseFloat(valorNumerico) / 100;
-        
         const limiteMaximo = (modoSimulacao === 'normal') ? 200 : 274.17;
-
         if (valorFloat > limiteMaximo) {
             valorInput.classList.add('invalid');
             valorWarning.textContent = `O valor máximo para este campo é ${formatadorMoeda.format(limiteMaximo)}.`;
@@ -296,7 +289,6 @@
             valorInput.classList.remove('invalid');
             valorWarning.textContent = '';
         }
-
         if (valorNumerico === '') { e.target.value = ''; return; }
         e.target.value = formatadorMoeda.format(valorFloat);
     });
@@ -310,13 +302,6 @@
             diasInput.classList.remove('invalid');
             diasWarning.textContent = '';
         }
-    });
-
-    themeToggle.addEventListener('click', () => {
-        document.body.classList.toggle('light-mode');
-        const isLight = document.body.classList.contains('light-mode');
-        themeToggle.innerHTML = isLight ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
-        localStorage.setItem('theme', isLight ? 'light' : 'dark');
     });
 
     let historico = [];
@@ -466,7 +451,6 @@
         `;
         setTimeout(() => elementoResultado.classList.add('show'), 10);
     }
-
     
     function showError(title, message) {
         elementoResultado.innerHTML = `
@@ -492,13 +476,39 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        if (localStorage.getItem('theme') === 'light') {
+    themeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        const isLight = document.body.classList.contains('light-mode');
+        themeToggle.innerHTML = isLight ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    });
+
+    function aplicarTema(tema) {
+        if (tema === 'light') {
             document.body.classList.add('light-mode');
             themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+        } else {
+            document.body.classList.remove('light-mode');
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
         }
+    }
+
+    function configurarTemaInicial() {
+        const temaSalvo = localStorage.getItem('theme');
+        if (temaSalvo) {
+            aplicarTema(temaSalvo);
+        } else {
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                aplicarTema('light');
+            } else {
+                aplicarTema('dark');
+            }
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        configurarTemaInicial();
         carregarHistorico();
-        // Garante que a label dos dias esteja correta ao carregar a página
         setModoNormal();
     });
 </script>
